@@ -1,0 +1,102 @@
+openapi: 3.0.0
+info:
+  title: URL Shortener API
+  description: API для сокращения URL с поддержкой статистики
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Локальный сервер
+paths:
+  /shorten:
+    post:
+      summary: Создать сокращённую ссылку
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url:
+                  type: string
+                  example: "https://example.com/some-long-url"
+      responses:
+        "200":
+          description: Успешное создание короткой ссылки
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  shortened_url:
+                    type: string
+                    example: "http://localhost:8080/abc123"
+  /{code}:
+    get:
+      summary: Перенаправление по сокращённому URL
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "abc123"
+      responses:
+        "301":
+          description: Перенаправление на оригинальный URL
+          headers:
+            Location:
+              schema:
+                type: string
+                example: "https://example.com/some-long-url"
+        "404":
+          description: Ссылка не найдена
+  /stats/{code}:
+    get:
+      summary: Получить статистику по ссылке
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "abc123"
+      responses:
+        "200":
+          description: Статистика по ссылке
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  original_url:
+                    type: string
+                    example: "https://example.com/some-long-url"
+                  clicks:
+                    type: integer
+                    example: 12
+                  created_at:
+                    type: string
+                    format: date-time
+                    example: "2024-03-25T12:00:00Z"
+  /delete/{code}:
+    delete:
+      summary: Удалить сокращённую ссылку
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+          example: "abc123"
+      responses:
+        "200":
+          description: Ссылка успешно удалена
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "URL deleted"
