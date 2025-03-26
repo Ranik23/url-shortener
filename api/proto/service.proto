@@ -12,7 +12,7 @@ service URLShortener {
 }
 
 message ShortenRequest {
-  string url = 1;
+  string original_url = 1;
 }
 
 message ShortenResponse {
@@ -20,7 +20,7 @@ message ShortenResponse {
 }
 
 message GetRequest {
-  string code = 1;
+  string shortened_url = 1;
 }
 
 message GetResponse {
@@ -28,7 +28,7 @@ message GetResponse {
 }
 
 message StatsRequest {
-  string code = 1;
+  string shortened_url = 1;
 }
 
 message StatsResponse {
@@ -38,7 +38,7 @@ message StatsResponse {
 }
 
 message DeleteRequest {
-  string code = 1;
+  string shortened_url = 1;
 }
 
 message DeleteResponse {

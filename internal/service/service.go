@@ -10,6 +10,7 @@ import (
 var (
 	ErrNotFound = errors.New("not found")
 	ErrEmptyURL = errors.New("short url cannot be empty")	
+	ErrInternal = errors.New("internal error")
 )
 
 type Service interface {

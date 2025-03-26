@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/Ranik23/url-shortener/internal/repository"
@@ -17,6 +16,9 @@ type linkService struct {
 }
 
 func (l *linkService) CreateShortURL(ctx context.Context, default_link string) (string, error) {
+	if strings.TrimSpace(default_link) == "" {
+		return "", ErrEmptyURL
+	}
 
 	var short_link string
 
@@ -24,17 +26,17 @@ func (l *linkService) CreateShortURL(ctx context.Context, default_link string) (
 
 		shortened_link, err := l.linkRepo.GetShortenedLink(txCtx, default_link)
 		if err != nil && !errors.Is(err, repository.ErrNotFound){
-			return err
+			return ErrInternal
 		}
 
 		short_link, err = utils.GenereateShortenedLink(default_link)
 		if err != nil {
-			return err
+			return ErrInternal
 		}
 
 		if errors.Is(err, repository.ErrNotFound) {
 			if err := l.linkRepo.CreateLink(txCtx, default_link, short_link); err != nil {
-				return err
+				return ErrInternal
 			}
 			return nil
 		}
@@ -44,7 +46,7 @@ func (l *linkService) CreateShortURL(ctx context.Context, default_link string) (
 	})
 
 	if err != nil {
-		return "", err
+		return "", ErrInternal
 	}
 
 	return short_link, nil
@@ -59,7 +61,7 @@ func (l *linkService) DeleteShortURL(ctx context.Context, shortURL string) error
 			if errors.Is(err, repository.ErrNotFound) {
 				return ErrNotFound
 			}
-			return err
+			return ErrInternal
 		}
 		return nil
 	})
@@ -76,11 +78,14 @@ func (l *linkService) ResolveShortURL(ctx context.Context, shortURL string) (str
 	err := l.txManager.WithTx(ctx, pgx.Serializable, pgx.ReadOnly, func(txCtx context.Context) error {
 		var err error
 		default_link, err = l.linkRepo.GetDefaultLink(txCtx, shortURL)
-		return err
+		if err != nil {
+			return ErrInternal
+		}
+		return nil
 	})
 
 	if err != nil {
-		return "", fmt.Errorf("failed to resolve short URL: %w", err)
+		return "", ErrInternal
 	}
 
 	return default_link, nil

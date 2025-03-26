@@ -23,7 +23,7 @@ const (
 
 type ShortenRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Url           string                 `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`
+	OriginalUrl   string                 `protobuf:"bytes,1,opt,name=original_url,json=originalUrl,proto3" json:"original_url,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -58,9 +58,9 @@ func (*ShortenRequest) Descriptor() ([]byte, []int) {
 	return file_service_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *ShortenRequest) GetUrl() string {
+func (x *ShortenRequest) GetOriginalUrl() string {
 	if x != nil {
-		return x.Url
+		return x.OriginalUrl
 	}
 	return ""
 }
@@ -111,7 +111,7 @@ func (x *ShortenResponse) GetShortenedUrl() string {
 
 type GetRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Code          string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`
+	ShortenedUrl  string                 `protobuf:"bytes,1,opt,name=shortened_url,json=shortenedUrl,proto3" json:"shortened_url,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -146,9 +146,9 @@ func (*GetRequest) Descriptor() ([]byte, []int) {
 	return file_service_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *GetRequest) GetCode() string {
+func (x *GetRequest) GetShortenedUrl() string {
 	if x != nil {
-		return x.Code
+		return x.ShortenedUrl
 	}
 	return ""
 }
@@ -199,7 +199,7 @@ func (x *GetResponse) GetOriginalUrl() string {
 
 type StatsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Code          string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`
+	ShortenedUrl  string                 `protobuf:"bytes,1,opt,name=shortened_url,json=shortenedUrl,proto3" json:"shortened_url,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -234,9 +234,9 @@ func (*StatsRequest) Descriptor() ([]byte, []int) {
 	return file_service_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *StatsRequest) GetCode() string {
+func (x *StatsRequest) GetShortenedUrl() string {
 	if x != nil {
-		return x.Code
+		return x.ShortenedUrl
 	}
 	return ""
 }
@@ -303,7 +303,7 @@ func (x *StatsResponse) GetCreatedAt() string {
 
 type DeleteRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Code          string                 `protobuf:"bytes,1,opt,name=code,proto3" json:"code,omitempty"`
+	ShortenedUrl  string                 `protobuf:"bytes,1,opt,name=shortened_url,json=shortenedUrl,proto3" json:"shortened_url,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -338,9 +338,9 @@ func (*DeleteRequest) Descriptor() ([]byte, []int) {
 	return file_service_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *DeleteRequest) GetCode() string {
+func (x *DeleteRequest) GetShortenedUrl() string {
 	if x != nil {
-		return x.Code
+		return x.ShortenedUrl
 	}
 	return ""
 }
@@ -393,25 +393,25 @@ var File_service_proto protoreflect.FileDescriptor
 
 const file_service_proto_rawDesc = "" +
 	"\n" +
-	"\rservice.proto\x12\furlshortener\"\"\n" +
-	"\x0eShortenRequest\x12\x10\n" +
-	"\x03url\x18\x01 \x01(\tR\x03url\"6\n" +
+	"\rservice.proto\x12\furlshortener\"3\n" +
+	"\x0eShortenRequest\x12!\n" +
+	"\foriginal_url\x18\x01 \x01(\tR\voriginalUrl\"6\n" +
 	"\x0fShortenResponse\x12#\n" +
-	"\rshortened_url\x18\x01 \x01(\tR\fshortenedUrl\" \n" +
+	"\rshortened_url\x18\x01 \x01(\tR\fshortenedUrl\"1\n" +
 	"\n" +
-	"GetRequest\x12\x12\n" +
-	"\x04code\x18\x01 \x01(\tR\x04code\"0\n" +
+	"GetRequest\x12#\n" +
+	"\rshortened_url\x18\x01 \x01(\tR\fshortenedUrl\"0\n" +
 	"\vGetResponse\x12!\n" +
-	"\foriginal_url\x18\x01 \x01(\tR\voriginalUrl\"\"\n" +
-	"\fStatsRequest\x12\x12\n" +
-	"\x04code\x18\x01 \x01(\tR\x04code\"i\n" +
+	"\foriginal_url\x18\x01 \x01(\tR\voriginalUrl\"3\n" +
+	"\fStatsRequest\x12#\n" +
+	"\rshortened_url\x18\x01 \x01(\tR\fshortenedUrl\"i\n" +
 	"\rStatsResponse\x12!\n" +
 	"\foriginal_url\x18\x01 \x01(\tR\voriginalUrl\x12\x16\n" +
 	"\x06clicks\x18\x02 \x01(\x05R\x06clicks\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x03 \x01(\tR\tcreatedAt\"#\n" +
-	"\rDeleteRequest\x12\x12\n" +
-	"\x04code\x18\x01 \x01(\tR\x04code\"*\n" +
+	"created_at\x18\x03 \x01(\tR\tcreatedAt\"4\n" +
+	"\rDeleteRequest\x12#\n" +
+	"\rshortened_url\x18\x01 \x01(\tR\fshortenedUrl\"*\n" +
 	"\x0eDeleteResponse\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage2\xad\x02\n" +
 	"\fURLShortener\x12I\n" +
