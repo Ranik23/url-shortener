@@ -18,7 +18,7 @@ func NewStatHandler(service service.StatService) *StatHandler {
 
 
 func (sh *StatHandler) GetStats(c *gin.Context) {
-	c.JSON(200, map[string]bool{
+	c.JSON(200, gin.H{
 		"success": true,
 	})
 }

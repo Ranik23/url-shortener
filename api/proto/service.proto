@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package urlshortener;
+
+option go_package = "api/proto/gen;gen";
+
+service URLShortener {
+  rpc ShortenURL (ShortenRequest) returns (ShortenResponse);
+  rpc GetOriginalURL (GetRequest) returns (GetResponse);
+  rpc GetStats (StatsRequest) returns (StatsResponse);
+  rpc DeleteURL (DeleteRequest) returns (DeleteResponse);
+}
+
+message ShortenRequest {
+  string url = 1;
+}
+
+message ShortenResponse {
+  string shortened_url = 1;
+}
+
+message GetRequest {
+  string code = 1;
+}
+
+message GetResponse {
+  string original_url = 1;
+}
+
+message StatsRequest {
+  string code = 1;
+}
+
+message StatsResponse {
+  string original_url = 1;
+  int32 clicks = 2;
+  string created_at = 3;
+}
+
+message DeleteRequest {
+  string code = 1;
+}
+
+message DeleteResponse {
+  string message = 1;
+}

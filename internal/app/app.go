@@ -18,6 +18,9 @@ type App struct {
 }
 
 func NewApp() (*App, error) {
+
+	closer := NewCloser()
+
 	cfg, err := config.LoadConfig(".env", "config/config.yaml")
 	if err != nil {
 		return nil, err
@@ -28,6 +31,12 @@ func NewApp() (*App, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	closer.Add(func(ctx context.Context) error {
+		pool.Close()
+		return nil
+	})
+	
 
 	txManager := postgres.NewTxManager(pool, slog.Default())
 
@@ -44,6 +53,13 @@ func NewApp() (*App, error) {
 	handler.SetUpRoutes()
 
 	shortenerServer := server.NewShortenerServer("localhost:8080", handler, slog.Default())
+
+	closer.Add(func(ctx context.Context) error {
+		if err := shortenerServer.ShutDown(ctx); err != nil {
+			return err
+		}
+		return nil
+	})
 
 	return &App{
 		shortenerServer: shortenerServer,

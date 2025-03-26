@@ -26,7 +26,6 @@ func NewShortenerServer(addr string, handler http.Handler, logger *slog.Logger) 
 	}
 }
 
-
 //blocking
 func (ss *ShortenerServer) ListenServe() {
 

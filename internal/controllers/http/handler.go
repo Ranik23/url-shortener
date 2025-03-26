@@ -10,13 +10,13 @@ import (
 
 
 type Handler struct {
-	gin.Engine
+	*gin.Engine
 	service service.Service
 }
 
 func NewHandler(service service.Service) *Handler {
 	return &Handler{
-		Engine: *gin.Default(),
+		Engine: gin.Default(),
 		service: service,
 	}
 }
