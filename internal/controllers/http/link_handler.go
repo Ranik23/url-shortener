@@ -1,10 +1,6 @@
 package http
 
 import (
-	"context"
-	"errors"
-	"net/http"
-
 	"github.com/Ranik23/url-shortener/internal/service"
 	"github.com/gin-gonic/gin"
 )
