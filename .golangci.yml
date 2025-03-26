@@ -1,0 +1,23 @@
+# .golangci.yml
+
+version: "2"
+
+linters:
+  enable:
+    - govet
+    - staticcheck
+    - errcheck
+    - gocyclo
+    - unparam
+    - dupl
+    - ineffassign
+    - misspell
+    - bodyclose
+    - cyclop
+    - dupword
+    - revive
+
+run:
+  tests: true
+
+
