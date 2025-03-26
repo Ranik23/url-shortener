@@ -20,15 +20,22 @@ type DBConfig struct {
 }
 
 
-type ServerConfig struct {
+type HTTPServerConfig struct {
+	Host		string	`yaml:"host"`
+	Port		string	`yaml:"port"`
+}
+
+
+type GRPCServerConfig struct {
 	Host		string	`yaml:"host"`
 	Port		string	`yaml:"port"`
 }
 
 
 type Config struct {
-	Database DBConfig		`yaml:"database"`
-	Server   ServerConfig	`yaml:"server"`
+	Database 	 DBConfig			`yaml:"database"`
+	HTTPServer   HTTPServerConfig	`yaml:"http_server"`
+	GRPCServer	 GRPCServerConfig	`yaml:"grpc_server"`
 }
 
 func (db *DBConfig) GetPostgresDSN() string {

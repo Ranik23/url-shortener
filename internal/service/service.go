@@ -1,11 +1,8 @@
 package service
 
 import (
-	"context"
 	"errors"
 )
-
-
 
 var (
 	ErrNotFound = errors.New("not found")
@@ -18,22 +15,6 @@ type Service interface {
 	StatService
 	UserService
 }
-
-type LinkService interface {
-	CreateShortURL(ctx context.Context, originalURL string) (string, error)
-	DeleteShortURL(ctx context.Context, shortURL string) 	error
-	ResolveShortURL(ctx context.Context, shortURL string) (string, error) 
-}
-
-type StatService interface {
-	GetStats(ctx context.Context, shortURL string) (any, error)
-}
-
-type UserService interface {
-	CreateUser(ctx context.Context, username string) error
-	DeleteUser(ctx context.Context, username string) error
-}
-
 
 
 type service struct {

@@ -10,6 +10,12 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+type LinkService interface {
+	CreateShortURL(ctx context.Context, originalURL string) (string, error)
+	DeleteShortURL(ctx context.Context, shortURL string) 	error
+	ResolveShortURL(ctx context.Context, shortURL string) (string, error) 
+}
+
 type linkService struct {
 	linkRepo 	repository.LinkRepository
 	txManager 	repository.TxManager

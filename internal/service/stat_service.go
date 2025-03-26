@@ -2,6 +2,10 @@ package service
 
 import "context"
 
+type StatService interface {
+	GetStats(ctx context.Context, shortURL string) (any, error)
+}
+
 type statService struct {}
 
 

@@ -15,8 +15,10 @@ type ShortenerServer struct {
 }
 
 //go:generate bash -c "impl -dir . 's *ShortenerServer' gen.URLShortenerServer >> grpc.go"
-func NewShortenerServer() gen.URLShortenerServer {
-	return &ShortenerServer{}
+func NewShortenerServer(service service.Service) gen.URLShortenerServer {
+	return &ShortenerServer{
+		service: service,
+	}
 }
 
 func (s *ShortenerServer) ShortenURL(ctx context.Context, req *gen.ShortenRequest) (*gen.ShortenResponse, error) {

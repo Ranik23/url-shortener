@@ -21,15 +21,15 @@ func NewCloser() *Closer {
 }
 
 func (c *Closer) Add(f Func) {
-	c.Mutex.Lock()
-	defer c.Mutex.Unlock()
+	c.Lock()
+	defer c.Unlock()
 	c.funcs = append(c.funcs, f)
 }
 
 
 func (c *Closer) Close(ctx context.Context) error {
-	c.Mutex.Lock()
-	defer c.Mutex.Unlock()
+	c.Lock()
+	defer c.Unlock()
 
 	var (
 		msgs    = make([]string, 0, len(c.funcs))
