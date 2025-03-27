@@ -1,4 +1,4 @@
-package app
+package closer
 
 import (
 	"context"
@@ -8,40 +8,42 @@ import (
 )
 
 
-type Func = func(context.Context) error
+type closeFunc = func(context.Context) error
 
+// Closer represents a type that captures close functions for connections. 
 type Closer struct {
 	sync.Mutex
-	funcs []Func
+	funcs []closeFunc
 }
 
-
+// NewCloser creates a new Closer
 func NewCloser() *Closer {
 	return &Closer{}
 }
 
-func (c *Closer) Add(f Func) {
+// Add function adds a new closer function 
+func (c *Closer) Add(f closeFunc) {
 	c.Lock()
 	defer c.Unlock()
 	c.funcs = append(c.funcs, f)
 }
 
-
+// Close function runs all closer functions
 func (c *Closer) Close(ctx context.Context) error {
 	c.Lock()
 	defer c.Unlock()
 
 	var (
 		msgs    = make([]string, 0, len(c.funcs))
-		wg      sync.WaitGroup
+		waitgroup      sync.WaitGroup
 		errorCh = make(chan error, len(c.funcs))
 		done    = make(chan struct{})
 	)
 
 	for i := len(c.funcs) - 1; i >= 0; i-- {
-		wg.Add(1)
-		go func(f Func) {
-			defer wg.Done()
+		waitgroup.Add(1)
+		go func(f closeFunc) {
+			defer waitgroup.Done()
 			if err := f(ctx); err != nil {
 				errorCh <- err
 			}
@@ -49,7 +51,7 @@ func (c *Closer) Close(ctx context.Context) error {
 	}
 
 	go func() {
-		wg.Wait()
+		waitgroup.Wait()
 		close(done)
 		close(errorCh)
 	}()

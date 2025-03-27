@@ -1,4 +1,5 @@
-package utils
+package servicehelpers
+
 
 import (
 	"crypto/sha256"

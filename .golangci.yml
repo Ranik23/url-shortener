@@ -16,6 +16,12 @@ linters:
     - cyclop
     - dupword
     - revive
+    - goconst
+    - gocritic
+    - nestif
+    - whitespace
+    - varnamelen
+    - prealloc
 
 run:
   tests: true

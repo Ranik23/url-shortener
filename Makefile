@@ -4,5 +4,8 @@ protoc:
 lint:
 	golangci-lint run $(filter-out $@, $(MAKECMDGOALS))
 
-.PHONY: lint protoc
+run:
+	go run cmd/service/main.go
+
+.PHONY: lint protoc run
 

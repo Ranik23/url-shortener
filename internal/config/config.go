@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -11,6 +10,7 @@ import (
 
 
 type DBConfig struct {
+	Type		string	`yaml:"type"`
 	Host 		string	`yaml:"host"`
 	Port 		string	`yaml:"port"`
 	UserName 	string	`yaml:"username"`
@@ -37,11 +37,6 @@ type Config struct {
 	HTTPServer   HTTPServerConfig	`yaml:"http_server"`
 	GRPCServer	 GRPCServerConfig	`yaml:"grpc_server"`
 }
-
-func (db *DBConfig) GetPostgresDSN() string {
-	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s", db.UserName, db.Password, db.Host, db.Port, db.DBName, db.SSL)
-}
-
 
 func LoadConfig(envPath string, configPath string) (*Config, error) {
 
