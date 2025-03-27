@@ -16,10 +16,11 @@ import (
 	http_controllers "github.com/Ranik23/url-shortener/internal/controllers/http"
 	"github.com/Ranik23/url-shortener/internal/libs/closer"
 	http_server "github.com/Ranik23/url-shortener/internal/libs/http_server"
-	repo_helpers "github.com/Ranik23/url-shortener/internal/libs/repository_helpers"
-	postgres "github.com/Ranik23/url-shortener/internal/repository/pgxpool"
+	//repo_helpers "github.com/Ranik23/url-shortener/internal/libs/repository_helpers"
+	inmemory "github.com/Ranik23/url-shortener/internal/repository/in_memory"
+	//postgres "github.com/Ranik23/url-shortener/internal/repository/pgxpool"
 	"github.com/Ranik23/url-shortener/internal/service"
-	"github.com/jackc/pgx/v5/pgxpool"
+	//"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lmittmann/tint"
 	"google.golang.org/grpc"
 )
@@ -42,25 +43,28 @@ func NewApp() (*App, error) {
 		return nil, err
 	}
 
-	connectionString := repo_helpers.GetConnectionString(cfg.Database.Type, 
-		cfg.Database.Host, cfg.Database.Port, cfg.Database.UserName, cfg.Database.Password, cfg.Database.DBName)
-	pool, err := pgxpool.New(context.Background(), connectionString)
-	if err != nil {
-		return nil, err
-	}
+	// connectionString := repo_helpers.GetConnectionString(cfg.Database.Type, 
+	// 	cfg.Database.Host, cfg.Database.Port, cfg.Database.UserName, cfg.Database.Password, cfg.Database.DBName)
+	// pool, err := pgxpool.New(context.Background(), connectionString)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	closer.Add(func(_ context.Context) error {
-		pool.Close()
-		return nil
-	})
+	// closer.Add(func(_ context.Context) error {
+	// 	pool.Close()
+	// 	return nil
+	// })
 	
-	txManager 	:= postgres.NewPgxTxManager(pool, slog.Default(), nil)
-	ctxManager  := postgres.NewPgxCtxManager(pool)
-	linkRepo 	:= postgres.NewPostgresLinkRepository(ctxManager, nil)
-	userRepo 	:= postgres.NewPgxUserRepository(ctxManager, nil)
-	linkService := service.NewLinkService(linkRepo, txManager)
+	txManager := inmemory.NewInMemoryTxManager()
+	repo := inmemory.NewInMemoryRepository(logger)
+	//txManager 	:= postgres.NewPgxTxManager(pool, slog.Default(), nil)
+	// ctxManager  := postgres.NewPgxCtxManager(pool)
+	// linkRepo 	:= postgres.NewPostgresLinkRepository(ctxManager, nil)
+	// userRepo 	:= postgres.NewPgxUserRepository(ctxManager, nil)
+
+	linkService := service.NewLinkService(repo, txManager, logger)
 	statService := service.NewStatService()
-	userService := service.NewUserService(userRepo, txManager)
+	userService := service.NewUserService(repo, txManager)
 	service 	:= service.NewService(linkService, statService, userService)
 	handler 	:= http_controllers.NewHandler(service)
 

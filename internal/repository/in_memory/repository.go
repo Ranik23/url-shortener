@@ -2,15 +2,19 @@ package inmemory
 
 import (
 	"context"
+	"log/slog"
+
 	"github.com/Ranik23/url-shortener/internal/repository"
 )
 
 type inMemoryRepository struct {
-	links map[string]string
-	users map[string]int
+	links 	map[string]string
+	users 	map[string]int
+	logger *slog.Logger
 }
 
 func (u *inMemoryRepository) CreateUser(ctx context.Context, username string) error {
+	u.logger.Info("CreateUser")
 	u.users[username] += 1
 	return nil
 }
@@ -29,6 +33,7 @@ func (u *inMemoryRepository) UserExists(ctx context.Context, username string) (e
 
 // CreateLink implements repository.inMemoryRepository.
 func (l *inMemoryRepository) CreateLink(ctx context.Context, default_link string, shortened_link string) error {
+	l.logger.Info("CreateLIink")
 	l.links[default_link] = shortened_link
 	return nil
 }
@@ -60,6 +65,10 @@ func (l *inMemoryRepository) GetShortenedLink(ctx context.Context, default_link 
 	return value, nil
 }
 
-func NewInMemoryRepository() repository.Repository {
-	return &inMemoryRepository{}
+func NewInMemoryRepository(logger *slog.Logger) repository.Repository {
+	return &inMemoryRepository{
+		users: make(map[string]int),
+		links: make(map[string]string),
+		logger: logger,
+	}
 }
