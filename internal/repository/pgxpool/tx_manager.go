@@ -34,11 +34,11 @@ func (p *pgxTxManager) Do(ctx context.Context, fn func(context.Context) error) e
 
 
 	if err := fn(newCtx); err != nil {
-		tx.Rollback(ctx)
+		pgxTx.Rollback(ctx)
 		return err
 	}
 
-	return tx.Commit(ctx)
+	return pgxTx.Commit(ctx)
 }
 
 
@@ -54,9 +54,9 @@ func (p *pgxTxManager) DoWithSettings(ctx context.Context, pgxsettings repositor
 
 
 	if err := fn(newCtx); err != nil {
-		tx.Rollback(ctx)
+		pgxTx.Rollback(ctx)
 		return err
 	}
 
-	return tx.Commit(ctx)
+	return pgxTx.Commit(ctx)
 }

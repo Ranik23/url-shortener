@@ -3,6 +3,7 @@ package pgxpool
 import (
 	"context"
 	"errors"
+	"reflect"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/Ranik23/url-shortener/internal/repository"
@@ -15,10 +16,11 @@ type pgxUserRepository struct {
 }
 
 func (p *pgxUserRepository) CreateUser(ctx context.Context, username string) error {
-	tr 	 := p.ctxManager.ByKey(ctx, p.settings.CtxKey())
-	if tr == nil {
+	tr := p.ctxManager.ByKey(ctx, p.settings.CtxKey())
+	if tr == nil || reflect.ValueOf(tr).IsNil() {
 		tr = p.ctxManager.Default(ctx)
 	}
+	
 	exec := tr.Transaction().(pgx.Tx)
 
 

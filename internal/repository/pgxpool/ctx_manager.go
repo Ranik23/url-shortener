@@ -12,8 +12,13 @@ type pgxCtxManager struct {
 }
 
 func (p *pgxCtxManager) ByKey(ctx context.Context, key repository.CtxKey) repository.Transaction {
-	return ctx.Value(key).(repository.Transaction)
+	tx, ok := ctx.Value(key).(repository.Transaction)
+	if !ok {
+		return nil
+	}
+	return tx
 }
+
 
 func (p *pgxCtxManager) Default(ctx context.Context) repository.Transaction {
 	tx, err := p.pool.Begin(ctx)

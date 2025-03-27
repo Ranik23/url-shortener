@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/Ranik23/url-shortener/internal/repository"
-	servicehelpers "github.com/Ranik23/url-shortener/internal/libs/service_helpers"
+	service_helpers "github.com/Ranik23/url-shortener/internal/libs/service_helpers"
 )
 
 type LinkService interface {
@@ -34,7 +34,7 @@ func (l *linkService) CreateShortURL(ctx context.Context, default_link string) (
 			return ErrInternal
 		}
 
-		short_link, err = servicehelpers.GenereateShortenedLink(default_link)
+		short_link, err = service_helpers.GenereateShortenedLink(default_link)
 		if err != nil {
 			return ErrInternal
 		}
