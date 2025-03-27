@@ -1,4 +1,4 @@
-package postgres
+package pgxpool
 
 import (
 	"context"
@@ -9,13 +9,18 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-type postgresLinkRepository struct {
-	txManager repository.TxManager
+type pgxLinkRepository struct {
+	ctxManager 	repository.CtxManager
+	settings 	repository.Settings
 }
 
-// CreateLink implements repository.LinkRepository.
-func (p *postgresLinkRepository) CreateLink(ctx context.Context, default_link string, shortened_link string) error {
-	exec := p.txManager.GetExecutor(ctx)
+func (p *pgxLinkRepository) CreateLink(ctx context.Context, default_link string, shortened_link string) error {
+	tr 	 := p.ctxManager.ByKey(ctx, p.settings.CtxKey())
+	if tr == nil {
+		tr = p.ctxManager.Default(ctx)
+	}
+
+	exec := tr.Transaction().(pgx.Tx)
 
 	sql, args, err := sq.Insert("links").
 		Columns("default_link", "shortened_link").
@@ -34,8 +39,12 @@ func (p *postgresLinkRepository) CreateLink(ctx context.Context, default_link st
 }
 
 // GetDefaultLink implements repository.LinkRepository.
-func (p *postgresLinkRepository) GetDefaultLink(ctx context.Context, shortened_link string) (default_link string, err error) {
-	exec := p.txManager.GetExecutor(ctx)
+func (p *pgxLinkRepository) GetDefaultLink(ctx context.Context, shortened_link string) (default_link string, err error) {
+	tr 	 := p.ctxManager.ByKey(ctx, p.settings.CtxKey())
+	if tr == nil {
+		tr = p.ctxManager.Default(ctx)
+	}
+	exec := tr.Transaction().(pgx.Tx)
 
 	sql, args, err := sq.Select("default_link").
 		From("links").
@@ -57,8 +66,12 @@ func (p *postgresLinkRepository) GetDefaultLink(ctx context.Context, shortened_l
 }
 
 // GetShortenedLink implements repository.LinkRepository.
-func (p *postgresLinkRepository) GetShortenedLink(ctx context.Context, default_link string) (shortened_link string, err error) {
-	exec := p.txManager.GetExecutor(ctx)
+func (p *pgxLinkRepository) GetShortenedLink(ctx context.Context, default_link string) (shortened_link string, err error) {
+	tr 	 := p.ctxManager.ByKey(ctx, p.settings.CtxKey())
+	if tr == nil {
+		tr = p.ctxManager.Default(ctx)
+	}
+	exec := tr.Transaction().(pgx.Tx)
 
 	sql, args, err := sq.Select("shortened_link").
 		From("links").
@@ -79,9 +92,12 @@ func (p *postgresLinkRepository) GetShortenedLink(ctx context.Context, default_l
 	return shortened_link, nil
 }
 
-func (p *postgresLinkRepository) DeleteLink(ctx context.Context, default_link string) error {
-
-	exec := p.txManager.GetExecutor(ctx)
+func (p *pgxLinkRepository) DeleteLink(ctx context.Context, default_link string) error {
+	tr 	 := p.ctxManager.ByKey(ctx, p.settings.CtxKey())
+	if tr == nil {
+		tr = p.ctxManager.Default(ctx)
+	}
+	exec := tr.Transaction().(pgx.Tx)
 
 	sql, args, err := sq.Delete("links").
 		Where(sq.Eq{"default_link": default_link}).
@@ -102,8 +118,9 @@ func (p *postgresLinkRepository) DeleteLink(ctx context.Context, default_link st
 	return nil
 }
 
-func NewPostgresLinkRepository(txManager repository.TxManager) repository.LinkRepository {
-	return &postgresLinkRepository{
-		txManager: txManager,
+func NewPostgresLinkRepository(ctxManager repository.CtxManager, settings repository.Settings) repository.LinkRepository {
+	return &pgxLinkRepository {
+		settings: settings,
+		ctxManager: ctxManager,
 	}
 }

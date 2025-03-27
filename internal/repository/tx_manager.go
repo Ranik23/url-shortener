@@ -2,19 +2,30 @@ package repository
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgconn"
+	"time"
 )
 
+type CtxKey any
 
-type Executor interface {
-	Exec(ctx context.Context, sql string, arguments ...any) (pgconn.CommandTag, error)
-	Query(ctx context.Context, sql string, args ...any) (pgx.Rows, error)
-	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
+
+type Settings interface {
+	EnrichBy(external Settings) Settings
+	CtxKey() CtxKey
+	TimeOutOrNil() *time.Duration
 }
 
 type TxManager interface {
-	GetExecutor(ctx context.Context) Executor
-	WithTx(ctx context.Context, isoLevel pgx.TxIsoLevel, accessMode pgx.TxAccessMode, fn func(ctx context.Context) error) error
+	Do(context.Context, func(context.Context) error) error
+	DoWithSettings(context.Context, Settings, func(context.Context) error) error
 }
+
+type Transaction interface {
+    Commit(context.Context) error 
+    Rollback(context.Context) error 
+    Transaction() interface{}
+ }
+
+ type CtxManager interface {
+    Default(context.Context) Transaction
+    ByKey(context.Context, CtxKey) Transaction
+ }

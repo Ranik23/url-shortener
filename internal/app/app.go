@@ -17,7 +17,7 @@ import (
 	"github.com/Ranik23/url-shortener/internal/libs/closer"
 	http_server "github.com/Ranik23/url-shortener/internal/libs/http_server"
 	repo_helpers "github.com/Ranik23/url-shortener/internal/libs/repository_helpers"
-	"github.com/Ranik23/url-shortener/internal/repository/postgres"
+	postgres "github.com/Ranik23/url-shortener/internal/repository/pgxpool"
 	"github.com/Ranik23/url-shortener/internal/service"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/lmittmann/tint"
@@ -54,9 +54,10 @@ func NewApp() (*App, error) {
 		return nil
 	})
 	
-	txManager 	:= postgres.NewTxManager(pool, slog.Default())
-	linkRepo 	:= postgres.NewPostgresLinkRepository(txManager)
-	userRepo 	:= postgres.NewPostgresUserRepository(txManager)
+	txManager 	:= postgres.NewPgxTxManager(pool, slog.Default(), nil)
+	ctxManager  := postgres.NewPgxCtxManager(pool)
+	linkRepo 	:= postgres.NewPostgresLinkRepository(ctxManager, nil)
+	userRepo 	:= postgres.NewPgxUserRepository(ctxManager, nil)
 	linkService := service.NewLinkService(linkRepo, txManager)
 	statService := service.NewStatService()
 	userService := service.NewUserService(userRepo, txManager)

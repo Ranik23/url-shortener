@@ -7,7 +7,6 @@ import (
 
 	"github.com/Ranik23/url-shortener/internal/repository"
 	servicehelpers "github.com/Ranik23/url-shortener/internal/libs/service_helpers"
-	"github.com/jackc/pgx/v5"
 )
 
 type LinkService interface {
@@ -28,7 +27,7 @@ func (l *linkService) CreateShortURL(ctx context.Context, default_link string) (
 
 	var short_link string
 
-	err := l.txManager.WithTx(ctx, pgx.Serializable, pgx.ReadWrite, func(txCtx context.Context) error {
+	err := l.txManager.Do(ctx, func(txCtx context.Context) error {
 
 		shortened_link, err := l.linkRepo.GetShortenedLink(txCtx, default_link)
 		if err != nil && !errors.Is(err, repository.ErrNotFound){
@@ -62,7 +61,7 @@ func (l *linkService) DeleteShortURL(ctx context.Context, shortURL string) error
 	if strings.TrimSpace(shortURL) == "" {
 		return ErrEmptyURL
 	}
-	return l.txManager.WithTx(ctx, pgx.Serializable, pgx.ReadWrite, func(txCtx context.Context) error {
+	return l.txManager.Do(ctx, func(txCtx context.Context) error {
 		if err := l.linkRepo.DeleteLink(txCtx, shortURL); err != nil {
 			if errors.Is(err, repository.ErrNotFound) {
 				return ErrNotFound
@@ -81,7 +80,7 @@ func (l *linkService) ResolveShortURL(ctx context.Context, shortURL string) (str
 
 	var default_link string
 	
-	err := l.txManager.WithTx(ctx, pgx.Serializable, pgx.ReadOnly, func(txCtx context.Context) error {
+	err := l.txManager.Do(ctx, func(txCtx context.Context) error {
 		var err error
 		default_link, err = l.linkRepo.GetDefaultLink(txCtx, shortURL)
 		if err != nil {
