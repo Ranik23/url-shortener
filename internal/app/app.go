@@ -110,12 +110,14 @@ func (a *App) Run() error {
 	}	
 
 	go func() {
+		a.logger.Info("Starting HTTP Server")
 		if err := a.HTTPshortenerServer.Start(context.Background()); err != nil {
 			errorCh <- fmt.Errorf("failed to start gRPC Server: %v", err)
 		}
 	}()
 
 	go func() {
+		a.logger.Info("Starting gRPC Server")
 		if err := a.gRPCshortenerServer.Serve(listener); err != nil {
 			errorCh <- fmt.Errorf("failed to start HTTP Server: %v", err)
 		}

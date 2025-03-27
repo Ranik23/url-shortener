@@ -1,6 +1,8 @@
 package http
 
 import (
+	"bytes"
+	"encoding/json"
 	"net/http"
 	"testing"
 
@@ -25,8 +27,10 @@ func TestCreateShortURL(t *testing.T) {
 	router := gin.Default()
 	router.POST("/api/shorten", linkHandler.CreateShortURL)
 
+	body 		:= map[string]string{"url": "https://example.com"}
+	jsonBody, _ := json.Marshal(body)
 
-	req, _ := http.NewRequest("POST", "/api/shorten", nil)
+	req, _ := http.NewRequest("POST", "/api/shorten", bytes.NewBuffer(jsonBody))
 	req.Header.Set("Content-Type", "application/json")
 
 	w := httptest.NewRecorder()

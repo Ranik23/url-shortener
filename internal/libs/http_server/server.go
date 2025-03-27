@@ -38,7 +38,7 @@ func New(logger *slog.Logger, config Config, handler http.Handler) *Server {
 }
 
 func (a *Server) Start(ctx context.Context) error {
-	a.logger.Info(a.config.StartMsg)
+	//a.logger.Info(a.config.StartMsg)
 
 	g, ctx := errgroup.WithContext(ctx)
 
