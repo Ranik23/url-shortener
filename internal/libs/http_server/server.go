@@ -3,6 +3,7 @@ package httpserver
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"time"
@@ -17,16 +18,16 @@ type Server struct {
 }
 
 type Config struct {
-	Host			  string
-	Port              string
-	StartMsg          string
-	ShutdownTimeout   time.Duration
+	Host            string
+	Port            int
+	StartMsg        string
+	ShutdownTimeout time.Duration
 }
 
 func New(logger *slog.Logger, config Config, handler http.Handler) *Server {
 	server := &http.Server{
-		Handler:           handler,
-		Addr:              config.Host + ":" + config.Port,
+		Handler: handler,
+		Addr:    fmt.Sprintf("%s:%d", config.Host, config.Port),
 	}
 
 	s := Server{

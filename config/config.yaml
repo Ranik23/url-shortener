@@ -1,15 +1,32 @@
 http_server:
-  host: localhost
+  host: "0.0.0.0"
   port: 8080
+  shutdown_timeout: 30
 
 
 grpc_server:
-  host: localhost
+  host: "0.0.0.0"
   port: 9090
+  shutdown_timeout: 30
 
-database:
-  type: postgres
-  host: localhost
-  port: 5432
-  dbname: url-shortener
-  ssl: disable
+storage:
+  database:
+    type: postgres
+    host: localhost
+    port: 5432
+    dbname: url-shortener
+    ssl: disable
+    connection_attempts: 3
+    pool:
+      max_connections: 50
+      min_connections: 10
+      max_lifetime: 3600
+      max_idle_time: 300
+      health_check_period: 30
+
+  cache:
+    type: redis
+    port: 6379
+    db: 0
+    connection_attempts: 3
+
