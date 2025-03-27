@@ -3,7 +3,6 @@ package pgxpool
 import (
 	"context"
 	"errors"
-	"reflect"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/Ranik23/url-shortener/internal/repository"
@@ -17,7 +16,7 @@ type pgxLinkRepository struct {
 
 func (p *pgxLinkRepository) CreateLink(ctx context.Context, default_link string, shortened_link string) error {
 	tr 	 := p.ctxManager.ByKey(ctx, p.settings.CtxKey())
-	if tr == nil || reflect.ValueOf(tr).IsNil(){
+	if tr == nil {
 		tr = p.ctxManager.Default(ctx)
 	}
 

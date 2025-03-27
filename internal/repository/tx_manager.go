@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-type CtxKey any
+type CtxKey struct{}
 
 
 type Settings interface {
