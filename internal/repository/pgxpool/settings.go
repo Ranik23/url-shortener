@@ -16,8 +16,8 @@ func (p pgxSettings) CtxKey() repository.CtxKey {
 	return p.ctxKey
 }
 
-func (p pgxSettings) EnrichBy(external repository.Settings) repository.Settings {
-	if ext, ok := external.(pgxSettings); ok {
+func (p *pgxSettings) EnrichBy(external repository.Settings) repository.Settings {
+	if ext, ok := external.(*pgxSettings); ok {
 		p.txOpts = ext.txOpts
 	}
 	return p
