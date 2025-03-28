@@ -3,58 +3,56 @@ package http
 import (
 	"bytes"
 	"encoding/json"
-	"net/http"
-	"testing"
-
-	"net/http/httptest"
-
-	"github.com/Ranik23/url-shortener/internal/service/mock"
+	serviceMock "github.com/Ranik23/url-shortener/internal/service/mock"
 	"github.com/gin-gonic/gin"
-	"github.com/golang/mock/gomock"
-	"gotest.tools/v3/assert"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 )
 
 func TestCreateShortURL(t *testing.T) {
+	mockLinkService := serviceMock.NewLinkService(t)
 
-	ctrl := gomock.NewController(t)
-	mockLinkService := mock.NewMockLinkService(ctrl)
-
-
-	mockLinkService.EXPECT().CreateShortURL(gomock.Any(), gomock.Any()).Return("", nil).MinTimes(1)
+	// Устанавливаем ожидание вызова метода CreateShortURL с конкретным URL
+	expectedURL := "https://example.com"
+	mockLinkService.
+		On("CreateShortURL", mock.Anything, expectedURL).
+		Return("shortened", nil)
 
 	linkHandler := NewLinkHandler(mockLinkService)
 
 	router := gin.Default()
 	router.POST("/api/shorten", linkHandler.CreateShortURL)
 
-	body 		:= map[string]string{"url": "https://example.com"}
-	jsonBody, _ := json.Marshal(body)
+	body := map[string]string{"url": expectedURL}
+	jsonBody, err := json.Marshal(body)
+	assert.NoError(t, err)
 
-	req, _ := http.NewRequest("POST", "/api/shorten", bytes.NewBuffer(jsonBody))
+	req, err := http.NewRequest("POST", "/api/shorten", bytes.NewBuffer(jsonBody))
+	assert.NoError(t, err)
 	req.Header.Set("Content-Type", "application/json")
 
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
-}	
 
+	mockLinkService.AssertExpectations(t)
+}
 
-
-// доделать 
 func TestDeleteShortURL(t *testing.T) {
+	mockLinkService := serviceMock.NewLinkService(t)
 
-	ctrl := gomock.NewController(t)
-	mockLinkService := mock.NewMockLinkService(ctrl)
-
-
-	mockLinkService.EXPECT().DeleteShortURL(gomock.Any(), gomock.Any()).Return("", nil).MinTimes(1)
+	mockLinkService.
+		On("DeleteShortURL", mock.Anything, mock.Anything).
+		Return("", nil)
 
 	linkHandler := NewLinkHandler(mockLinkService)
 
 	router := gin.Default()
 	router.POST("/api/shorten", linkHandler.DeleteShortURL)
-
 
 	req, _ := http.NewRequest("POST", "/api/shorten", nil)
 	req.Header.Set("Content-Type", "application/json")
@@ -63,4 +61,6 @@ func TestDeleteShortURL(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, 200, w.Code)
-}	
+
+	mockLinkService.AssertExpectations(t)
+}

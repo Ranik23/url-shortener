@@ -6,7 +6,6 @@ import (
 
 	"github.com/Ranik23/url-shortener/internal/repository"
 	"github.com/Ranik23/url-shortener/internal/repository/mock"
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,16 +15,12 @@ func TestPgxCtxManager_ByKey(t *testing.T) {
 
 	key := repository.CtxKey{}
 
-	// Проверяем, что если в контексте нет транзакции, то вернется nil
 	tr := manager.ByKey(ctx, key)
 	assert.Nil(t, tr)
 
+	mockTx := mock.NewTransaction(t)
 
-	ctrl := gomock.NewController(t)
-
-	// Добавляем транзакцию в контекст и проверяем, что она корректно извлекается
-	mockTr := mock.NewMockTransaction(ctrl)
-	ctx = context.WithValue(ctx, key, mockTr)
+	ctx = context.WithValue(ctx, key, mockTx)
 	tr = manager.ByKey(ctx, key)
-	assert.Equal(t, mockTr, tr)
+	assert.Equal(t, mockTx, tr)
 }

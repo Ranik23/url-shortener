@@ -10,19 +10,20 @@ import (
 )
 
 type pgxLinkRepository struct {
-	ctxManager 	repository.CtxManager
-	settings 	repository.Settings
+	ctxManager repository.CtxManager
+	settings   repository.Settings
 }
 
 func (p *pgxLinkRepository) CreateLink(ctx context.Context, default_link string, shortened_link string) error {
-	tr 	 := p.ctxManager.ByKey(ctx, p.settings.CtxKey())
+	tr := p.ctxManager.ByKey(ctx, p.settings.CtxKey())
 	if tr == nil {
 		tr = p.ctxManager.Default(ctx)
 	}
 
 	exec := tr.Transaction().(pgx.Tx)
 
-	sql, args, err := sq.Insert("links").
+	sql, args, err := sq.StatementBuilder.
+		PlaceholderFormat(sq.Dollar).Insert("links").
 		Columns("default_link", "shortened_link").
 		Values(default_link, shortened_link).
 		ToSql()
@@ -31,7 +32,7 @@ func (p *pgxLinkRepository) CreateLink(ctx context.Context, default_link string,
 		return err
 	}
 
-	_, err = exec.Exec(ctx, sql, args)
+	_, err = exec.Exec(ctx, sql, args...)
 	if err != nil {
 		return err
 	}
@@ -40,13 +41,14 @@ func (p *pgxLinkRepository) CreateLink(ctx context.Context, default_link string,
 
 // GetDefaultLink implements repository.LinkRepository.
 func (p *pgxLinkRepository) GetDefaultLink(ctx context.Context, shortened_link string) (default_link string, err error) {
-	tr 	 := p.ctxManager.ByKey(ctx, p.settings.CtxKey())
+	tr := p.ctxManager.ByKey(ctx, p.settings.CtxKey())
 	if tr == nil {
 		tr = p.ctxManager.Default(ctx)
 	}
 	exec := tr.Transaction().(pgx.Tx)
 
-	sql, args, err := sq.Select("default_link").
+	sql, args, err := sq.StatementBuilder.
+		PlaceholderFormat(sq.Dollar).Select("default_link").
 		From("links").
 		Where(sq.Eq{"shortened_link": shortened_link}).
 		ToSql()
@@ -55,7 +57,7 @@ func (p *pgxLinkRepository) GetDefaultLink(ctx context.Context, shortened_link s
 		return "", err
 	}
 
-	if err = exec.QueryRow(ctx, sql, args).Scan(&default_link); err != nil {
+	if err = exec.QueryRow(ctx, sql, args...).Scan(&default_link); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return "", repository.ErrNotFound
 		}
@@ -67,13 +69,14 @@ func (p *pgxLinkRepository) GetDefaultLink(ctx context.Context, shortened_link s
 
 // GetShortenedLink implements repository.LinkRepository.
 func (p *pgxLinkRepository) GetShortenedLink(ctx context.Context, default_link string) (shortened_link string, err error) {
-	tr 	 := p.ctxManager.ByKey(ctx, p.settings.CtxKey())
+	tr := p.ctxManager.ByKey(ctx, p.settings.CtxKey())
 	if tr == nil {
 		tr = p.ctxManager.Default(ctx)
 	}
 	exec := tr.Transaction().(pgx.Tx)
 
-	sql, args, err := sq.Select("shortened_link").
+	sql, args, err := sq.StatementBuilder.
+		PlaceholderFormat(sq.Dollar).Select("shortened_link").
 		From("links").
 		Where(sq.Eq{"default_link": default_link}).
 		ToSql()
@@ -82,7 +85,7 @@ func (p *pgxLinkRepository) GetShortenedLink(ctx context.Context, default_link s
 		return "", err
 	}
 
-	if err = exec.QueryRow(ctx, sql, args).Scan(&shortened_link); err != nil {
+	if err = exec.QueryRow(ctx, sql, args...).Scan(&shortened_link); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return "", repository.ErrNotFound
 		}
@@ -92,15 +95,16 @@ func (p *pgxLinkRepository) GetShortenedLink(ctx context.Context, default_link s
 	return shortened_link, nil
 }
 
-func (p *pgxLinkRepository) DeleteLink(ctx context.Context, default_link string) error {
-	tr 	 := p.ctxManager.ByKey(ctx, p.settings.CtxKey())
+func (p *pgxLinkRepository) DeleteLink(ctx context.Context, shortLink string) error {
+	tr := p.ctxManager.ByKey(ctx, p.settings.CtxKey())
 	if tr == nil {
 		tr = p.ctxManager.Default(ctx)
 	}
 	exec := tr.Transaction().(pgx.Tx)
 
-	sql, args, err := sq.Delete("links").
-		Where(sq.Eq{"default_link": default_link}).
+	sql, args, err := sq.StatementBuilder.
+		PlaceholderFormat(sq.Dollar).Delete("links").
+		Where(sq.Eq{"shortened_link": shortLink}).
 		ToSql()
 	if err != nil {
 		return err
@@ -117,10 +121,9 @@ func (p *pgxLinkRepository) DeleteLink(ctx context.Context, default_link string)
 
 	return nil
 }
-
 func NewPostgresLinkRepository(ctxManager repository.CtxManager, settings repository.Settings) repository.LinkRepository {
-	return &pgxLinkRepository {
-		settings: settings,
+	return &pgxLinkRepository{
+		settings:   settings,
 		ctxManager: ctxManager,
 	}
 }

@@ -25,25 +25,24 @@ import (
 	"google.golang.org/grpc"
 )
 
-
 type App struct {
-	config					*config.Config
-	HTTPshortenerServer 	*http_server.Server
-	gRPCshortenerServer 	*grpc.Server
-	closer					*closer.Closer
-	logger					*slog.Logger
+	config              *config.Config
+	HTTPshortenerServer *http_server.Server
+	gRPCshortenerServer *grpc.Server
+	closer              *closer.Closer
+	logger              *slog.Logger
 }
 
 func NewApp() (*App, error) {
 
-	logger 	 := slog.New(tint.NewHandler(os.Stdout, nil))
-	closer 	 := closer.NewCloser()
+	logger := slog.New(tint.NewHandler(os.Stdout, nil))
+	closer := closer.NewCloser()
 	cfg, err := config.LoadConfig(".env", "config/config.yaml")
 	if err != nil {
 		return nil, err
 	}
 
-	// connectionString := repo_helpers.GetConnectionString(cfg.Database.Type, 
+	// connectionString := repo_helpers.GetConnectionString(cfg.Database.Type,
 	// 	cfg.Database.Host, cfg.Database.Port, cfg.Database.UserName, cfg.Database.Password, cfg.Database.DBName)
 	// pool, err := pgxpool.New(context.Background(), connectionString)
 	// if err != nil {
@@ -54,7 +53,7 @@ func NewApp() (*App, error) {
 	// 	pool.Close()
 	// 	return nil
 	// })
-	
+
 	txManager := inmemory.NewInMemoryTxManager()
 	repo := inmemory.NewInMemoryRepository(logger)
 	//txManager 	:= postgres.NewPgxTxManager(pool, slog.Default(), nil)
@@ -65,12 +64,12 @@ func NewApp() (*App, error) {
 	linkService := service.NewLinkService(repo, txManager, logger)
 	statService := service.NewStatService()
 	userService := service.NewUserService(repo, txManager)
-	service 	:= service.NewService(linkService, statService, userService)
-	handler 	:= http_controllers.NewHandler(service)
+	service := service.NewService(linkService, statService, userService)
+	handler := http_controllers.NewHandler(service)
 
 	handler.SetUpRoutes()
-	
-	grpcServer 			:= grpc.NewServer(grpc.UnaryInterceptor(grpc_server.ErrorHandlerInterceptor))
+
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(grpc_server.ErrorHandlerInterceptor))
 	grpcShortenerServer := grpc_server.NewShortenerServer(service)
 
 	gen.RegisterURLShortenerServer(grpcServer, grpcShortenerServer)
@@ -81,9 +80,9 @@ func NewApp() (*App, error) {
 	})
 
 	httpConfig := http_server.Config{
-		Host: cfg.HTTPServer.Host,
-		Port: cfg.HTTPServer.Port,
-		StartMsg: "Hello",
+		Host:            cfg.HTTPServer.Host,
+		Port:            cfg.HTTPServer.Port,
+		StartMsg:        "Hello",
 		ShutdownTimeout: 10 * time.Second,
 	}
 	shortenerServer := http_server.New(logger, httpConfig, handler)
@@ -91,15 +90,15 @@ func NewApp() (*App, error) {
 	return &App{
 		HTTPshortenerServer: shortenerServer,
 		gRPCshortenerServer: grpcServer,
-		config: cfg,
-		closer: closer,
-		logger: logger,
+		config:              cfg,
+		closer:              closer,
+		logger:              logger,
 	}, nil
 }
 
 func (a *App) Run() error {
 	defer func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 10 * time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 		if err := a.closer.Close(ctx); err != nil {
 			a.logger.Error("Failed to close resources", slog.String("error", err.Error()))
@@ -107,12 +106,12 @@ func (a *App) Run() error {
 		a.logger.Info("Successfully closed all resources")
 	}()
 
-	grpcAddr 	  := fmt.Sprintf("%s:%s", a.config.GRPCServer.Host, a.config.GRPCServer.Port)
-	errorCh 	  := make(chan error, 2)
+	grpcAddr := fmt.Sprintf("%s:%d", a.config.GRPCServer.Host, a.config.GRPCServer.Port)
+	errorCh := make(chan error, 2)
 	listener, err := net.Listen("tcp", grpcAddr)
 	if err != nil {
 		return err
-	}	
+	}
 
 	go func() {
 		a.logger.Info("Starting HTTP Server")
@@ -128,16 +127,14 @@ func (a *App) Run() error {
 		}
 	}()
 
-
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
-
 	select {
-	case <- quit:
+	case <-quit:
 		a.logger.Info("Получен сигнал завершения, выключаем gRPC сервер...")
 		return nil
-	case err := <- errorCh:
+	case err := <-errorCh:
 		a.logger.Error("Ошибка сервера", slog.String("error", err.Error()))
 		return err
 	}

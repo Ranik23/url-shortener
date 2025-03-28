@@ -30,6 +30,11 @@ type TestSuite struct {
 	psqlContainer *testutil.PostgreSQLContainer
 	httpServer    *httptest.Server
 	grpcServer    *grpc.Server
+
+	svc       service.Service
+	txManager repository.TxManager
+	userRepo  repository.UserRepository
+	linkRepo  repository.LinkRepository
 }
 
 func (s *TestSuite) SetupSuite() {
@@ -38,7 +43,7 @@ func (s *TestSuite) SetupSuite() {
 
 	logger := slog.New(tint.NewHandler(os.Stdout, nil))
 
-	cfg, err := config.LoadConfig("../../.env", "../../configs/")
+	cfg, err := config.LoadConfig("../../.env", "../../config/config.yaml")
 	s.Require().NoError(err)
 
 	psqlContainer, err := testutil.NewPostgreSQLContainer(ctx)
@@ -61,11 +66,12 @@ func (s *TestSuite) SetupSuite() {
 	pgPool, err := pgxpool.NewWithConfig(context.Background(), poolConfig)
 	s.Require().NoError(err)
 
-	txManager := imppool.NewPgxTxManager(pgPool, slog.Default(), nil)
 	ctxManager := imppool.NewPgxCtxManager(pgPool)
+	settings := imppool.NewPgxSettings()
+	txManager := imppool.NewPgxTxManager(pgPool, slog.Default(), settings)
 
-	linkRepo := imppool.NewPostgresLinkRepository(ctxManager, nil)
-	userRepo := imppool.NewPgxUserRepository(ctxManager, nil)
+	linkRepo := imppool.NewPostgresLinkRepository(ctxManager, settings)
+	userRepo := imppool.NewPgxUserRepository(ctxManager, settings)
 
 	repo := repository.NewRepository(userRepo, linkRepo)
 
@@ -73,6 +79,11 @@ func (s *TestSuite) SetupSuite() {
 	statService := service.NewStatService()
 	userService := service.NewUserService(repo, txManager)
 	svc := service.NewService(linkService, statService, userService)
+
+	s.svc = svc
+	s.txManager = txManager
+	s.userRepo = userRepo
+	s.linkRepo = linkRepo
 
 	handler := http_controllers.NewHandler(svc)
 	router := gin.Default()
