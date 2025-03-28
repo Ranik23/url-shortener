@@ -61,7 +61,6 @@ func (l *linkService) CreateShortURL(ctx context.Context, default_link string) (
 		l.logger.Error("CreateShortURL: transaction failed", slog.String("error", err.Error()))
 		return "", ErrInternal
 	}
-
 	l.logger.Info("CreateShortURL: successfully created short link", slog.String("short_link", short_link))
 	return short_link, nil
 }

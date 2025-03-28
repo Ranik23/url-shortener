@@ -68,7 +68,7 @@ func (s *TestSuite) SetupSuite() {
 
 	ctxManager := imppool.NewPgxCtxManager(pgPool)
 	settings := imppool.NewPgxSettings()
-	txManager := imppool.NewPgxTxManager(pgPool, slog.Default(), settings)
+	txManager := imppool.NewPgxTxManager(pgPool, logger, settings)
 
 	linkRepo := imppool.NewPostgresLinkRepository(ctxManager, settings)
 	userRepo := imppool.NewPgxUserRepository(ctxManager, settings)
@@ -77,7 +77,7 @@ func (s *TestSuite) SetupSuite() {
 
 	linkService := service.NewLinkService(repo, txManager, logger)
 	statService := service.NewStatService()
-	userService := service.NewUserService(repo, txManager)
+	userService := service.NewUserService(repo, txManager, logger)
 	svc := service.NewService(linkService, statService, userService)
 
 	s.svc = svc
