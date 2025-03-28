@@ -46,15 +46,15 @@ func TestDeleteShortURL(t *testing.T) {
 	mockLinkService := serviceMock.NewLinkService(t)
 
 	mockLinkService.
-		On("DeleteShortURL", mock.Anything, mock.Anything).
-		Return("", nil)
+		On("DeleteShortURL", mock.Anything, "abc123").
+		Return(nil)
 
 	linkHandler := NewLinkHandler(mockLinkService)
 
 	router := gin.Default()
-	router.POST("/api/shorten", linkHandler.DeleteShortURL)
+	router.POST("/api/delete/:code", linkHandler.DeleteShortURL)
 
-	req, _ := http.NewRequest("POST", "/api/shorten", nil)
+	req, _ := http.NewRequest("POST", "/api/delete/abc123", nil)
 	req.Header.Set("Content-Type", "application/json")
 
 	w := httptest.NewRecorder()
