@@ -6,6 +6,7 @@ import (
 
 var (
 	ErrNotFound = errors.New("not found")
+	ErrAlreadyExists = errors.New("already exists")
 	ErrEmptyURL = errors.New("short url cannot be empty")	
 	ErrInternal = errors.New("internal error")
 )

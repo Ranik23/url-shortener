@@ -63,7 +63,7 @@ func NewApp() (*App, error) {
 
 	linkService := service.NewLinkService(repo, txManager, logger)
 	statService := service.NewStatService()
-	userService := service.NewUserService(repo, txManager)
+	userService := service.NewUserService(repo, txManager, logger)
 	service := service.NewService(linkService, statService, userService)
 	handler := http_controllers.NewHandler(service)
 
