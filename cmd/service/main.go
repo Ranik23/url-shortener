@@ -7,9 +7,13 @@ import (
 )
 
 func main() {
+	
 	app, err := app.NewApp()
 	if err != nil {
 		log.Fatalf("Failed to create the app: %v", err)
 	}
-	app.Run()
+
+	if err := app.Run(); err != nil {
+		log.Fatalf("Failed to creare the app: %v", err)
+	}
 }
