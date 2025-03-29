@@ -9,12 +9,12 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-type pgxLinkRepository struct {
+type linkRepository struct {
 	ctxManager repository.CtxManager
 	settings   repository.Settings
 }
 
-func (p *pgxLinkRepository) CreateLink(ctx context.Context, default_link string, shortened_link string) error {
+func (p *linkRepository) CreateLink(ctx context.Context, default_link string, shortened_link string) error {
 	tr := p.ctxManager.ByKey(ctx, p.settings.CtxKey())
 	if tr == nil {
 		tr = p.ctxManager.Default(ctx)
@@ -40,7 +40,7 @@ func (p *pgxLinkRepository) CreateLink(ctx context.Context, default_link string,
 }
 
 // GetDefaultLink implements repository.LinkRepository.
-func (p *pgxLinkRepository) GetDefaultLink(ctx context.Context, shortened_link string) (default_link string, err error) {
+func (p *linkRepository) GetDefaultLink(ctx context.Context, shortened_link string) (default_link string, err error) {
 	tr := p.ctxManager.ByKey(ctx, p.settings.CtxKey())
 	if tr == nil {
 		tr = p.ctxManager.Default(ctx)
@@ -68,7 +68,7 @@ func (p *pgxLinkRepository) GetDefaultLink(ctx context.Context, shortened_link s
 }
 
 // GetShortenedLink implements repository.LinkRepository.
-func (p *pgxLinkRepository) GetShortenedLink(ctx context.Context, default_link string) (shortened_link string, err error) {
+func (p *linkRepository) GetShortenedLink(ctx context.Context, default_link string) (shortened_link string, err error) {
 	tr := p.ctxManager.ByKey(ctx, p.settings.CtxKey())
 	if tr == nil {
 		tr = p.ctxManager.Default(ctx)
@@ -95,7 +95,7 @@ func (p *pgxLinkRepository) GetShortenedLink(ctx context.Context, default_link s
 	return shortened_link, nil
 }
 
-func (p *pgxLinkRepository) DeleteLink(ctx context.Context, shortLink string) error {
+func (p *linkRepository) DeleteLink(ctx context.Context, shortLink string) error {
 	tr := p.ctxManager.ByKey(ctx, p.settings.CtxKey())
 	if tr == nil {
 		tr = p.ctxManager.Default(ctx)
@@ -121,8 +121,8 @@ func (p *pgxLinkRepository) DeleteLink(ctx context.Context, shortLink string) er
 
 	return nil
 }
-func NewPostgresLinkRepository(ctxManager repository.CtxManager, settings repository.Settings) repository.LinkRepository {
-	return &pgxLinkRepository{
+func NewLinkRepository(ctxManager repository.CtxManager, settings repository.Settings) repository.LinkRepository {
+	return &linkRepository{
 		settings:   settings,
 		ctxManager: ctxManager,
 	}

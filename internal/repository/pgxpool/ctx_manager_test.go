@@ -11,7 +11,7 @@ import (
 
 func TestPgxCtxManager_ByKey(t *testing.T) {
 	ctx := context.Background()
-	manager := NewPgxCtxManager(nil)
+	manager := NewCtxManager(nil)
 
 	key := repository.CtxKey{}
 

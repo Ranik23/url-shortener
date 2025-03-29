@@ -8,21 +8,21 @@ import (
 	pool "github.com/jackc/pgx/v5/pgxpool"
 )
 
-type pgxTxManager struct {
+type txManager struct {
 	pool   		*pool.Pool
 	pgxSettings repository.Settings
 	logger 		*slog.Logger
 }
 
-func NewPgxTxManager(pool *pool.Pool, log *slog.Logger, pgxSettings repository.Settings) repository.TxManager {
-	return &pgxTxManager{
+func NewTxManager(pool *pool.Pool, log *slog.Logger, pgxSettings repository.Settings) repository.TxManager {
+	return &txManager{
 		pool: pool,
 		logger: log,
 		pgxSettings: pgxSettings,
 	}
 }
 
-func (p *pgxTxManager) Do(ctx context.Context, fn func(context.Context) error) error {
+func (p *txManager) Do(ctx context.Context, fn func(context.Context) error) error {
 	tx, err := p.pool.Begin(ctx)
 	if err != nil {
 		return err
@@ -42,7 +42,7 @@ func (p *pgxTxManager) Do(ctx context.Context, fn func(context.Context) error) e
 }
 
 
-func (p *pgxTxManager) DoWithSettings(ctx context.Context, pgxsettings repository.Settings, fn func(context.Context) error) error {
+func (p *txManager) DoWithSettings(ctx context.Context, pgxsettings repository.Settings, fn func(context.Context) error) error {
 	tx, err := p.pool.Begin(ctx)
 	if err != nil {
 		return err

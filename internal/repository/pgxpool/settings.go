@@ -7,36 +7,36 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-type pgxSettings struct {
+type settings struct {
 	txOpts *pgx.TxOptions
 	ctxKey struct{}
 }
 
-func (p pgxSettings) CtxKey() repository.CtxKey {
+func (p settings) CtxKey() repository.CtxKey {
 	return p.ctxKey
 }
 
-func (p *pgxSettings) EnrichBy(external repository.Settings) repository.Settings {
-	if ext, ok := external.(*pgxSettings); ok {
+func (p *settings) EnrichBy(external repository.Settings) repository.Settings {
+	if ext, ok := external.(*settings); ok {
 		p.txOpts = ext.txOpts
 	}
 	return p
 }
 
-func (p pgxSettings) TimeOutOrNil() *time.Duration {
+func (p settings) TimeOutOrNil() *time.Duration {
 	panic("unimplemented")
 }
 
-func NewPgxSettings() repository.Settings {
+func NewSettings() repository.Settings {
 	txOpts := &pgx.TxOptions{
 		IsoLevel:   pgx.Serializable,
 		AccessMode: pgx.ReadWrite,
 	}
 
-	pgxSettings := &pgxSettings{
+	settings := &settings{
 		txOpts: txOpts,
 		ctxKey: struct{}{},
 	}
 
-	return pgxSettings
+	return settings
 }

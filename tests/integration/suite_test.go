@@ -66,12 +66,12 @@ func (s *TestSuite) SetupSuite() {
 	pgPool, err := pgxpool.NewWithConfig(context.Background(), poolConfig)
 	s.Require().NoError(err)
 
-	ctxManager := imppool.NewPgxCtxManager(pgPool)
-	settings := imppool.NewPgxSettings()
-	txManager := imppool.NewPgxTxManager(pgPool, logger, settings)
+	ctxManager := imppool.NewCtxManager(pgPool)
+	settings := imppool.NewSettings()
+	txManager := imppool.NewTxManager(pgPool, logger, settings)
 
-	linkRepo := imppool.NewPostgresLinkRepository(ctxManager, settings)
-	userRepo := imppool.NewPgxUserRepository(ctxManager, settings)
+	linkRepo := imppool.NewLinkRepository(ctxManager, settings)
+	userRepo := imppool.NewUserRepository(ctxManager, settings)
 
 	repo := repository.NewRepository(userRepo, linkRepo)
 

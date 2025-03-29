@@ -9,30 +9,30 @@ import (
 	pg"github.com/jackc/pgx/v5"
 )
 
-type pgxTransaction struct {
+type transaction struct {
 	mu 			sync.Mutex
 	tx 			pg.Tx
 	isClosed 	*drivers.IsClosed
 }
 
-func (t *pgxTransaction) Commit(ctx context.Context) error {
+func (t *transaction) Commit(ctx context.Context) error {
 	return t.tx.Commit(ctx)
 }
 
-func (t *pgxTransaction) IsActive() bool {
+func (t *transaction) IsActive() bool {
 	return t.isClosed.IsActive()
 }
 
-func (t *pgxTransaction) Rollback(ctx context.Context) error {
+func (t *transaction) Rollback(ctx context.Context) error {
 	return t.tx.Rollback(ctx)
 }
 
-func (t *pgxTransaction) Transaction() interface{} {
+func (t *transaction) Transaction() interface{} {
 	return t.tx
 }
 
 func NewTransaction(tx pg.Tx) repository.Transaction {
-	return &pgxTransaction{
+	return &transaction{
 		isClosed: drivers.NewIsClosed(),
 		tx: tx,
 	}

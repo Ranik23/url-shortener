@@ -54,16 +54,14 @@ func NewApp() (*App, error) {
 	// 	return nil
 	// })
 
-	txManager := inmemory.NewInMemoryTxManager()
-	repo := inmemory.NewInMemoryRepository(logger)
+	txManager := inmemory.NewTxManager()
 	//txManager 	:= postgres.NewPgxTxManager(pool, slog.Default(), nil)
 	// ctxManager  := postgres.NewPgxCtxManager(pool)
-	// linkRepo 	:= postgres.NewPostgresLinkRepository(ctxManager, nil)
-	// userRepo 	:= postgres.NewPgxUserRepository(ctxManager, nil)
-
-	linkService := service.NewLinkService(repo, txManager, logger)
+	linkRepo 	:= inmemory.NewLinkRepostiory(logger)
+	userRepo 	:= inmemory.NewUserRepository(logger)
+	linkService := service.NewLinkService(linkRepo, txManager, logger)
 	statService := service.NewStatService()
-	userService := service.NewUserService(repo, txManager, logger)
+	userService := service.NewUserService(userRepo, txManager, logger)
 	service := service.NewService(linkService, statService, userService)
 	handler := http_controllers.NewHandler(service)
 

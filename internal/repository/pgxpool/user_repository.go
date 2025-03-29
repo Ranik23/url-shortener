@@ -9,12 +9,12 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-type pgxUserRepository struct {
+type userRepository struct {
 	ctxManager 	repository.CtxManager
 	settings 	repository.Settings
 }
 
-func (p *pgxUserRepository) CreateUser(ctx context.Context, username string) error {
+func (p *userRepository) CreateUser(ctx context.Context, username string) error {
 	tr := p.ctxManager.ByKey(ctx, p.settings.CtxKey())
 	if tr == nil {
 		tr = p.ctxManager.Default(ctx)
@@ -40,7 +40,7 @@ func (p *pgxUserRepository) CreateUser(ctx context.Context, username string) err
 	return nil
 }
 
-func (p *pgxUserRepository) DeleteUser(ctx context.Context, username string) error {
+func (p *userRepository) DeleteUser(ctx context.Context, username string) error {
 	tr 	 := p.ctxManager.ByKey(ctx, p.settings.CtxKey())
 	if tr == nil {
 		tr = p.ctxManager.Default(ctx)
@@ -66,7 +66,7 @@ func (p *pgxUserRepository) DeleteUser(ctx context.Context, username string) err
 	return nil
 }
 
-func (p *pgxUserRepository) UserExists(ctx context.Context, username string) (bool, error) {
+func (p *userRepository) UserExists(ctx context.Context, username string) (bool, error) {
 	tr 	 := p.ctxManager.ByKey(ctx, p.settings.CtxKey())
 	if tr == nil {
 		tr = p.ctxManager.Default(ctx)
@@ -93,9 +93,8 @@ func (p *pgxUserRepository) UserExists(ctx context.Context, username string) (bo
 	return true, nil
 }
 
-// NewPgxUserRepository creates a new instance of UserRepository.
-func NewPgxUserRepository(ctxManager repository.CtxManager, settings repository.Settings) repository.UserRepository {
-	return &pgxUserRepository{
+func NewUserRepository(ctxManager repository.CtxManager, settings repository.Settings) repository.UserRepository {
+	return &userRepository{
 		ctxManager: ctxManager,
 		settings: settings,
 	}

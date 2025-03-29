@@ -7,11 +7,11 @@ import (
 	pool "github.com/jackc/pgx/v5/pgxpool"
 )
 
-type pgxCtxManager struct {
+type ctxManager struct {
 	pool *pool.Pool
 }
 
-func (p *pgxCtxManager) ByKey(ctx context.Context, key repository.CtxKey) repository.Transaction {
+func (p *ctxManager) ByKey(ctx context.Context, key repository.CtxKey) repository.Transaction {
 	tx, ok := ctx.Value(key).(repository.Transaction)
 	if !ok {
 		return nil
@@ -20,7 +20,7 @@ func (p *pgxCtxManager) ByKey(ctx context.Context, key repository.CtxKey) reposi
 }
 
 
-func (p *pgxCtxManager) Default(ctx context.Context) repository.Transaction {
+func (p *ctxManager) Default(ctx context.Context) repository.Transaction {
 	tx, err := p.pool.Begin(ctx)
 	if err != nil {
 		return nil
@@ -28,8 +28,8 @@ func (p *pgxCtxManager) Default(ctx context.Context) repository.Transaction {
 	return NewTransaction(tx)
 }
 
-func NewPgxCtxManager(pool *pool.Pool) repository.CtxManager {
-	return &pgxCtxManager{
+func NewCtxManager(pool *pool.Pool) repository.CtxManager {
+	return &ctxManager{
 		pool: pool,
 	}
 }
