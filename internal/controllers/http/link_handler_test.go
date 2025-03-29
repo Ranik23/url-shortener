@@ -52,7 +52,7 @@ func TestDeleteShortURL(t *testing.T) {
 	linkHandler := NewLinkHandler(mockLinkService)
 
 	router := gin.Default()
-	router.POST("/api/delete/:code", linkHandler.DeleteShortURL)
+	router.POST("/api/delete/:shorten_url", linkHandler.DeleteShortURL)
 
 	req, _ := http.NewRequest("POST", "/api/delete/abc123", nil)
 	req.Header.Set("Content-Type", "application/json")
