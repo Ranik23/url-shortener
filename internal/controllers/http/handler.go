@@ -3,6 +3,7 @@ package http
 import (
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/Ranik23/url-shortener/internal/service"
 	"github.com/gin-gonic/gin"
@@ -22,23 +23,27 @@ func NewHandler(service service.Service) *Handler {
 }
 
 
-func (h *Handler) AddRoute(method string, path string, fn gin.HandlerFunc) error {
-	allowedMethods := map[string]bool{
-		"GET": true, "POST": true, "PUT": true, "DELETE": true, "PATCH": true,
-		"HEAD": true, "OPTIONS": true,
-	}
-
+func (h *Handler) AddRoute(method, path string, fn gin.HandlerFunc) error {
 	if method == "" || path == "" || fn == nil {
 		return errors.New("invalid route parameters")
 	}
 
-	if !allowedMethods[method] {
+	switch method {
+	case "GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS":
+		defer func() {
+			if err := recover(); err != nil {
+				log.Printf("panic in AddRoute: %v\n", err)
+			}
+		}()
+
+		h.Handle(method, path, fn)
+		return nil
+
+	default:
 		return fmt.Errorf("unsupported HTTP method: %s", method)
 	}
-
-	h.Handle(method, path, fn)
-	return nil
 }
+
 
 func (h *Handler) SetUpRoutes() {
 

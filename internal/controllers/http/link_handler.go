@@ -36,9 +36,12 @@ func (lh *LinkHandler) CreateShortURL(c *gin.Context) {
 		return
 	}
 
-	lh.mainHandler.AddRoute("GET", shortURL, func(c *gin.Context) {
+	if err := lh.mainHandler.AddRoute("GET", shortURL, func(c *gin.Context) {
 		c.Redirect(http.StatusPermanentRedirect, url)
-	})
+	}); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to add route"})
+		return 
+	}
 
 	c.JSON(http.StatusOK, gin.H{"shortened_url": shortURL})
 }
