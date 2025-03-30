@@ -1,19 +1,16 @@
 package http
 
 import (
-	"github.com/Ranik23/url-shortener/internal/service"
 	"github.com/gin-gonic/gin"
 )
 
 
 type StatHandler struct {
-	service service.StatService
+	mainHandler *Handler
 }
 
-func NewStatHandler(service service.StatService) *StatHandler {
-	return &StatHandler{
-		service: service,
-	}
+func NewStatHandler(mainHandler *Handler) *StatHandler {
+	return &StatHandler{mainHandler: mainHandler}
 }
 
 

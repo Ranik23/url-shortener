@@ -42,8 +42,8 @@ func (h *Handler) AddRoute(method string, path string, fn gin.HandlerFunc) error
 
 func (h *Handler) SetUpRoutes() {
 
-	linkHandler := NewLinkHandler(h.service)
-	statHandler := NewStatHandler(h.service)
+	linkHandler := NewLinkHandler(h)
+	statHandler := NewStatHandler(h)
 
 	api := h.Group("/api") 
 	{

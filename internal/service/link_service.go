@@ -5,9 +5,12 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"errors"
-	"github.com/Ranik23/url-shortener/internal/repository"
+	"fmt"
 	"log/slog"
 	"strings"
+	"time"
+
+	"github.com/Ranik23/url-shortener/internal/repository"
 )
 
 type LinkService interface {
@@ -142,7 +145,11 @@ func (l *linkService) generateShortenedLink(defaultLink string) (string, error) 
 	if defaultLink == "" {
 		return "", errors.New("empty URL not allowed")
 	}
-	hash := sha256.Sum256([]byte(defaultLink))
+
+	salt := time.Now().UnixNano()
+	hash := sha256.Sum256([]byte(fmt.Sprintf("%d%s", salt, defaultLink)))
+	
 	shortURL := base64.RawURLEncoding.EncodeToString(hash[:])[:8]
 	return shortURL, nil
 }
+

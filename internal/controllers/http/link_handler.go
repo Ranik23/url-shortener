@@ -3,18 +3,16 @@ package http
 import (
 	"context"
 	"net/http"
-
-	"github.com/Ranik23/url-shortener/internal/service"
 	"github.com/gin-gonic/gin"
 )
 
 
 type LinkHandler struct {
-	service service.LinkService
+	mainHandler *Handler
 }
 
-func NewLinkHandler(service service.LinkService) *LinkHandler{
-	return &LinkHandler{service: service}
+func NewLinkHandler(mainHandler *Handler) *LinkHandler{
+	return &LinkHandler{mainHandler: mainHandler}
 }
 
 func (lh *LinkHandler) CreateShortURL(c *gin.Context) {
@@ -32,11 +30,15 @@ func (lh *LinkHandler) CreateShortURL(c *gin.Context) {
 		return
 	}
 
-	shortURL, err := lh.service.CreateShortURL(context.Background(), url)
+	shortURL, err := lh.mainHandler.service.CreateShortURL(context.Background(), url)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create short URL"})
 		return
 	}
+
+	lh.mainHandler.AddRoute("GET", shortURL, func(c *gin.Context) {
+		c.Redirect(http.StatusPermanentRedirect, url)
+	})
 
 	c.JSON(http.StatusOK, gin.H{"shortened_url": shortURL})
 }
@@ -51,7 +53,7 @@ func (lh *LinkHandler) DeleteShortURL(c *gin.Context) {
 	}
 
 
-	if err := lh.service.DeleteShortURL(context.Background(), shortURL); err != nil {
+	if err := lh.mainHandler.service.DeleteShortURL(context.Background(), shortURL); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete URL"})
 		return 
 	}
